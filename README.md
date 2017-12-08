@@ -1,12 +1,5 @@
 
- # ICCV paper of DualGAN
-<a href="https://arxiv.org/abs/1704.02510">DualGAN: unsupervised dual learning for image-to-image translation</a>
-
-please cite the paper, if the codes has been used for your research.
-
-# architecture of DualGAN
-
-![architecture](https://github.com/duxingren14/DualGAN/blob/master/0.png)
+ # My conditionalGAN
 
 # How to setup
 
@@ -31,7 +24,7 @@ please cite the paper, if the codes has been used for your research.
 * clone this repo:
 
 ```
-git clone https://github.com/duxingren14/DualGAN.git
+git clone https://github.com/AlanSDU/cGAN.git
 
 cd DualGAN
 ```
@@ -45,25 +38,19 @@ bash ./datasets/download_dataset.sh sketch-photo
 * train the model:
 
 ```
-python main.py --phase train --dataset_name sketch-photo --image_size 256 --epoch 45 --lambda_A 20.0 --lambda_B 20.0 --A_channels 1 --B_channels 1
+python main.py --phase train --dataset_name sketch-photo --image_size 256 --epoch 45 --A_channels 1 --B_channels 1
 ```
 
 * test the model:
 
 ```
-python main.py --phase test --dataset_name sketch-photo --image_size 256 --epoch 45 --lambda_A 20.0 --lambda_B 20.0 --A_channels 1 --B_channels 1
+python main.py --phase test --dataset_name sketch-photo --image_size 256 --epoch 45 --A_channels 1 --B_channels 1
 ```
 
 ## optional
-
-Similarly, run experiments on facades dataset with the following commands:
-
 ```
 bash ./datasets/download_dataset.sh facades
 
-python main.py --phase train --dataset_name facades --image_size 256 --epoch 45 --lambda_A 20.0 --lambda_B 20.0 --A_channels 3 --B_channels 3
-
-python main.py --phase test --dataset_name facades --image_size 256 --epoch 45 --lambda_A 20.0 --lambda_B 20.0 --A_channels 3 --B_channels 3
 ```
 
 # datasets
@@ -76,22 +63,26 @@ sketch: http://mmlab.ie.cuhk.edu.hk/archive/cufsf/
 
 maps: https://mega.nz/#!r8xwCBCD!lNBrY_2QO6pyUJziGj7ikPheUL_yXA8xGXFlM3GPL3c
 
-oil-chinese:  http://www.cs.mun.ca/~yz7241/, jump to http://www.cs.mun.ca/~yz7241/dataset/
-
 day-night: http://www.cs.mun.ca/~yz7241/dataset/
 
 
-# Experimental results:
 
-![day2night](https://github.com/duxingren14/DualGAN/blob/master/6.PNG)
-![da2ni](https://github.com/duxingren14/DualGAN/blob/master/da2ni.png)
-![la2ph](https://github.com/duxingren14/DualGAN/blob/master/la2ph.png)
-![ph2la](https://github.com/duxingren14/DualGAN/blob/master/ph2la.png)
-![sk2ph](https://github.com/duxingren14/DualGAN/blob/master/sk2ph.png)
-![ph2sk](https://github.com/duxingren14/DualGAN/blob/master/ph2sk.png)
-![ch2oi](https://github.com/duxingren14/DualGAN/blob/master/ch2oi.png)
-![oi2ch](https://github.com/duxingren14/DualGAN/blob/master/oi2ch.png)
+# Cite
 
-# Acknowledgments
+Codes are built on the top of DualGAN. Thanks for their precedent contributions!
 
-Codes are built on the top of pix2pix-tensorflow and DCGAN-tensorflow. Thanks for their precedent contributions!
+Conditional Generative Adversarial Nets
+@article{DBLP:journals/corr/MirzaO14,
+  author    = {Mehdi Mirza and
+               Simon Osindero},
+  title     = {Conditional Generative Adversarial Nets},
+  journal   = {CoRR},
+  volume    = {abs/1411.1784},
+  year      = {2014},
+  url       = {http://arxiv.org/abs/1411.1784},
+  archivePrefix = {arXiv},
+  eprint    = {1411.1784},
+  timestamp = {Wed, 07 Jun 2017 14:40:37 +0200},
+  biburl    = {http://dblp.org/rec/bib/journals/corr/MirzaO14},
+  bibsource = {dblp computer science bibliography, http://dblp.org}
+}
