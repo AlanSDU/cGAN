@@ -76,19 +76,4 @@ day-night: http://www.cs.mun.ca/~yz7241/dataset/
 
 Codes are built on the top of DualGAN. Thanks for their precedent contributions!
 
-Conditional Generative Adversarial Nets
-
-@article{DBLP:journals/corr/MirzaO14,
-  author    = {Mehdi Mirza and
-               Simon Osindero},
-  title     = {Conditional Generative Adversarial Nets},
-  journal   = {CoRR},
-  volume    = {abs/1411.1784},
-  year      = {2014},
-  url       = {http://arxiv.org/abs/1411.1784},
-  archivePrefix = {arXiv},
-  eprint    = {1411.1784},
-  timestamp = {Wed, 07 Jun 2017 14:40:37 +0200},
-  biburl    = {http://dblp.org/rec/bib/journals/corr/MirzaO14},
-  bibsource = {dblp computer science bibliography, http://dblp.org}
-}
+Conditional Generative Adversarial Nets: http://arxiv.org/abs/1411.1784
