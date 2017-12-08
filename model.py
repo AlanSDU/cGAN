@@ -220,30 +220,6 @@ class DualNet(object):
     def A_d_net(self, imgs1, imgs2, y = None, reuse = False):
         return self.discriminator(imgs1, imgs2, prefix = 'A_d_', reuse = reuse)
         
-    def discriminator(self, image1, image2, y=None, prefix='A_d_', reuse=False):
-        # image is 256 x 256 x (input_c_dim + output_c_dim)
-        with tf.variable_scope(tf.get_variable_scope()) as scope:
-            if reuse:
-                scope.reuse_variables()
-            else:
-                assert scope.reuse == False
-
-
-
-            h01 = lrelu(conv2d(image1, self.df_dim, name=prefix + 'h01_conv'))
-            h02 = lrelu(conv2d(image2, self.df_dim, name=prefix + 'h02_conv'))
-            h0 = tf.concat(axis=0, values=[h01, h02], name=prefix + 'h0_conv')  # check the channel to cat
-            # h0 is (128 x 128 x self.df_dim)
-            h1 = lrelu(batch_norm(conv2d(h0, self.df_dim*2, name=prefix+'h1_conv'), name = prefix+'bn1'))
-            # h1 is (64 x 64 x self.df_dim*2)
-            h2 = lrelu(batch_norm(conv2d(h1, self.df_dim*4, name=prefix+'h2_conv'), name = prefix+ 'bn2'))
-            # h2 is (32x 32 x self.df_dim*4)
-            h3 = lrelu(batch_norm(conv2d(h2, self.df_dim*8, d_h=1, d_w=1, name=prefix+'h3_conv'), name = prefix+ 'bn3'))
-            # h3 is (32 x 32 x self.df_dim*8)
-            h4 = conv2d(h3, 1, d_h=1, d_w=1, name =prefix+'h4')
-            return h4
-
-
     # def discriminator(self, image1, image2, y=None, prefix='A_d_', reuse=False):
     #     # image is 256 x 256 x (input_c_dim + output_c_dim)
     #     with tf.variable_scope(tf.get_variable_scope()) as scope:
@@ -260,104 +236,38 @@ class DualNet(object):
     #         # h0 is (128 x 128 x self.df_dim)
     #         h1 = lrelu(batch_norm(conv2d(h0, self.df_dim*2, name=prefix+'h1_conv'), name = prefix+'bn1'))
     #         # h1 is (64 x 64 x self.df_dim*2)
-    #         h2 = lrelu(batch_norm(conv2d(h1, self.df_dim*8, d_h=1, d_w=1, name=prefix+'h3_conv'), name = prefix+ 'bn3'))
-    #         # h2 is (32 x 32 x self.df_dim*8)
-    #         h3 = conv2d(h2, 1, d_h=1, d_w=1, name =prefix+'h4')
-    #         return h3
+    #         h2 = lrelu(batch_norm(conv2d(h1, self.df_dim*4, name=prefix+'h2_conv'), name = prefix+ 'bn2'))
+    #         # h2 is (32x 32 x self.df_dim*4)
+    #         h3 = lrelu(batch_norm(conv2d(h2, self.df_dim*8, d_h=1, d_w=1, name=prefix+'h3_conv'), name = prefix+ 'bn3'))
+    #         # h3 is (32 x 32 x self.df_dim*8)
+    #         h4 = conv2d(h3, 1, d_h=1, d_w=1, name =prefix+'h4')
+    #         return h4
 
 
-    def A_g_net(self, imgs, reuse=False):
-        return self.fcn(imgs, prefix='A_g_', reuse = reuse)
-
-    def fcn(self, imgs, prefix=None, reuse=False):
+    def discriminator(self, image1, image2, y=None, prefix='A_d_', reuse=False):
+        # image is 256 x 256 x (input_c_dim + output_c_dim)
         with tf.variable_scope(tf.get_variable_scope()) as scope:
             if reuse:
                 scope.reuse_variables()
             else:
                 assert scope.reuse == False
 
-            s = self.image_size
-            s2, s4, s8, s16, s32, s64, s128 = int(s / 2), int(s / 4), int(s / 8), int(s / 16), int(s / 32), int(
-                s / 64), int(s / 128)
 
-            # imgs is (256 x 256 x input_c_dim)
-            e1 = conv2d(imgs, self.fcn_filter_dim, name=prefix + 'e1_conv')
-            # e1 is (128 x 128 x self.fcn_filter_dim)
-            e2 = batch_norm(conv2d(lrelu(e1), self.fcn_filter_dim * 2, name=prefix + 'e2_conv'), name=prefix + 'bn_e2')
-            # e2 is (64 x 64 x self.fcn_filter_dim*2)
-            e3 = batch_norm(conv2d(lrelu(e2), self.fcn_filter_dim * 4, name=prefix + 'e3_conv'), name=prefix + 'bn_e3')
-            # e3 is (32 x 32 x self.fcn_filter_dim*4)
-            e4 = batch_norm(conv2d(lrelu(e3), self.fcn_filter_dim * 8, name=prefix + 'e4_conv'), name=prefix + 'bn_e4')
-            # e4 is (16 x 16 x self.fcn_filter_dim*8)
-            e5 = batch_norm(conv2d(lrelu(e4), self.fcn_filter_dim * 8, name=prefix + 'e5_conv'), name=prefix + 'bn_e5')
-            # e5 is (8 x 8 x self.fcn_filter_dim*8)
-            e6 = batch_norm(conv2d(lrelu(e5), self.fcn_filter_dim * 8, name=prefix + 'e6_conv'), name=prefix + 'bn_e6')
-            # e6 is (4 x 4 x self.fcn_filter_dim*8)
-            e7 = batch_norm(conv2d(lrelu(e6), self.fcn_filter_dim * 8, name=prefix + 'e7_conv'), name=prefix + 'bn_e7')
-            # e7 is (2 x 2 x self.fcn_filter_dim*8)
-            e8 = batch_norm(conv2d(lrelu(e7), self.fcn_filter_dim * 8, name=prefix + 'e8_conv'), name=prefix + 'bn_e8')
-            # e8 is (1 x 1 x self.fcn_filter_dim*8)
 
-            self.d1, self.d1_w, self.d1_b = deconv2d(tf.nn.relu(e8),
-                                                     [self.batch_size, s128, s128, self.fcn_filter_dim * 8],
-                                                     name=prefix + 'd1', with_w=True)
-            d1 = tf.nn.dropout(batch_norm(self.d1, name=prefix + 'bn_d1'), 0.5)
-            d1 = tf.concat([d1, e7], 3)
-            # d1 is (2 x 2 x self.fcn_filter_dim*8*2)
+            h01 = lrelu(conv2d(image1, self.df_dim, name=prefix + 'h01_conv'))
+            h02 = lrelu(conv2d(image2, self.df_dim, name=prefix + 'h02_conv'))
+            h0 = tf.concat(axis=0, values=[h01, h02], name=prefix + 'h0_conv')  # check the channel to cat
+            # h0 is (128 x 128 x self.df_dim)
+            h1 = lrelu(batch_norm(conv2d(h0, self.df_dim*2, name=prefix+'h1_conv'), name = prefix+'bn1'))
+            # h1 is (64 x 64 x self.df_dim*2)
+            h2 = lrelu(batch_norm(conv2d(h1, self.df_dim*8, d_h=1, d_w=1, name=prefix+'h3_conv'), name = prefix+ 'bn3'))
+            # h2 is (32 x 32 x self.df_dim*8)
+            h3 = conv2d(h2, 1, d_h=1, d_w=1, name =prefix+'h4')
+            return h3
 
-            self.d2, self.d2_w, self.d2_b = deconv2d(tf.nn.relu(d1),
-                                                     [self.batch_size, s64, s64, self.fcn_filter_dim * 8],
-                                                     name=prefix + 'd2', with_w=True)
-            d2 = tf.nn.dropout(batch_norm(self.d2, name=prefix + 'bn_d2'), 0.5)
 
-            d2 = tf.concat([d2, e6], 3)
-            # d2 is (4 x 4 x self.fcn_filter_dim*8*2)
-
-            self.d3, self.d3_w, self.d3_b = deconv2d(tf.nn.relu(d2),
-                                                     [self.batch_size, s32, s32, self.fcn_filter_dim * 8],
-                                                     name=prefix + 'd3', with_w=True)
-            d3 = tf.nn.dropout(batch_norm(self.d3, name=prefix + 'bn_d3'), 0.5)
-
-            d3 = tf.concat([d3, e5], 3)
-            # d3 is (8 x 8 x self.fcn_filter_dim*8*2)
-
-            self.d4, self.d4_w, self.d4_b = deconv2d(tf.nn.relu(d3),
-                                                     [self.batch_size, s16, s16, self.fcn_filter_dim * 8],
-                                                     name=prefix + 'd4', with_w=True)
-            d4 = batch_norm(self.d4, name=prefix + 'bn_d4')
-
-            d4 = tf.concat([d4, e4], 3)
-            # d4 is (16 x 16 x self.fcn_filter_dim*8*2)
-
-            self.d5, self.d5_w, self.d5_b = deconv2d(tf.nn.relu(d4),
-                                                     [self.batch_size, s8, s8, self.fcn_filter_dim * 4],
-                                                     name=prefix + 'd5', with_w=True)
-            d5 = batch_norm(self.d5, name=prefix + 'bn_d5')
-            d5 = tf.concat([d5, e3], 3)
-            # d5 is (32 x 32 x self.fcn_filter_dim*4*2)
-
-            self.d6, self.d6_w, self.d6_b = deconv2d(tf.nn.relu(d5),
-                                                     [self.batch_size, s4, s4, self.fcn_filter_dim * 2],
-                                                     name=prefix + 'd6', with_w=True)
-            d6 = batch_norm(self.d6, name=prefix + 'bn_d6')
-            d6 = tf.concat([d6, e2], 3)
-            # d6 is (64 x 64 x self.fcn_filter_dim*2*2)
-
-            self.d7, self.d7_w, self.d7_b = deconv2d(tf.nn.relu(d6),
-                                                     [self.batch_size, s2, s2, self.fcn_filter_dim], name=prefix + 'd7',
-                                                     with_w=True)
-            d7 = batch_norm(self.d7, name=prefix + 'bn_d7')
-            d7 = tf.concat([d7, e1], 3)
-            # d7 is (128 x 128 x self.fcn_filter_dim*1*2)
-
-            if prefix == 'B_g_':
-                self.d8, self.d8_w, self.d8_b = deconv2d(tf.nn.relu(d7), [self.batch_size, s, s, self.A_channels],
-                                                         name=prefix + 'd8', with_w=True)
-            elif prefix == 'A_g_':
-                self.d8, self.d8_w, self.d8_b = deconv2d(tf.nn.relu(d7), [self.batch_size, s, s, self.B_channels],
-                                                         name=prefix + 'd8', with_w=True)
-                # d8 is (256 x 256 x output_c_dim)
-            return tf.nn.tanh(self.d8)
+    def A_g_net(self, imgs, reuse=False):
+        return self.fcn(imgs, prefix='A_g_', reuse = reuse)
 
     # def fcn(self, imgs, prefix=None, reuse=False):
     #     with tf.variable_scope(tf.get_variable_scope()) as scope:
@@ -373,43 +283,133 @@ class DualNet(object):
     #         # imgs is (256 x 256 x input_c_dim)
     #         e1 = conv2d(imgs, self.fcn_filter_dim, name=prefix + 'e1_conv')
     #         # e1 is (128 x 128 x self.fcn_filter_dim)
-    #         e2 = batch_norm(conv2d(lrelu(e1), self.fcn_filter_dim * 2, name=prefix + 'e2_conv'),
-    #                         name=prefix + 'bn_e2')
+    #         e2 = batch_norm(conv2d(lrelu(e1), self.fcn_filter_dim * 2, name=prefix + 'e2_conv'), name=prefix + 'bn_e2')
     #         # e2 is (64 x 64 x self.fcn_filter_dim*2)
-    #         e7 = batch_norm(conv2d(lrelu(e2), self.fcn_filter_dim * 4, name=prefix + 'e7_conv'),
-    #                         name=prefix + 'bn_e7')
+    #         e3 = batch_norm(conv2d(lrelu(e2), self.fcn_filter_dim * 4, name=prefix + 'e3_conv'), name=prefix + 'bn_e3')
+    #         # e3 is (32 x 32 x self.fcn_filter_dim*4)
+    #         e4 = batch_norm(conv2d(lrelu(e3), self.fcn_filter_dim * 8, name=prefix + 'e4_conv'), name=prefix + 'bn_e4')
+    #         # e4 is (16 x 16 x self.fcn_filter_dim*8)
+    #         e5 = batch_norm(conv2d(lrelu(e4), self.fcn_filter_dim * 8, name=prefix + 'e5_conv'), name=prefix + 'bn_e5')
+    #         # e5 is (8 x 8 x self.fcn_filter_dim*8)
+    #         e6 = batch_norm(conv2d(lrelu(e5), self.fcn_filter_dim * 8, name=prefix + 'e6_conv'), name=prefix + 'bn_e6')
+    #         # e6 is (4 x 4 x self.fcn_filter_dim*8)
+    #         e7 = batch_norm(conv2d(lrelu(e6), self.fcn_filter_dim * 8, name=prefix + 'e7_conv'), name=prefix + 'bn_e7')
     #         # e7 is (2 x 2 x self.fcn_filter_dim*8)
-    #         e8 = batch_norm(conv2d(lrelu(e7), self.fcn_filter_dim * 8, name=prefix + 'e8_conv'),
-    #                         name=prefix + 'bn_e8')
+    #         e8 = batch_norm(conv2d(lrelu(e7), self.fcn_filter_dim * 8, name=prefix + 'e8_conv'), name=prefix + 'bn_e8')
     #         # e8 is (1 x 1 x self.fcn_filter_dim*8)
     #
     #         self.d1, self.d1_w, self.d1_b = deconv2d(tf.nn.relu(e8),
-    #                                                  [self.batch_size, s8, s8, self.fcn_filter_dim * 4],
+    #                                                  [self.batch_size, s128, s128, self.fcn_filter_dim * 8],
     #                                                  name=prefix + 'd1', with_w=True)
-    #         # d1 = tf.nn.dropout(batch_norm(self.d1, name=prefix + 'bn_d1'), 0.5)
     #         d1 = tf.nn.dropout(batch_norm(self.d1, name=prefix + 'bn_d1'), 0.5)
     #         d1 = tf.concat([d1, e7], 3)
     #         # d1 is (2 x 2 x self.fcn_filter_dim*8*2)
     #
     #         self.d2, self.d2_w, self.d2_b = deconv2d(tf.nn.relu(d1),
-    #                                                  [self.batch_size, s4, s4, self.fcn_filter_dim * 2],
+    #                                                  [self.batch_size, s64, s64, self.fcn_filter_dim * 8],
     #                                                  name=prefix + 'd2', with_w=True)
-    #         # d2 = tf.nn.dropout(batch_norm(self.d2, name=prefix + 'bn_d2'), 0.5)
-    #         d2 = batch_norm(self.d2, name=prefix + 'bn_d2')
+    #         d2 = tf.nn.dropout(batch_norm(self.d2, name=prefix + 'bn_d2'), 0.5)
     #
-    #         d2 = tf.concat([d2, e2], 3)
+    #         d2 = tf.concat([d2, e6], 3)
     #         # d2 is (4 x 4 x self.fcn_filter_dim*8*2)
-    #         self.d7, self.d7_w, self.d7_b = deconv2d(tf.nn.relu(d2),
-    #                                                  [self.batch_size, s2, s2, self.fcn_filter_dim],
-    #                                                  name=prefix + 'd7', with_w=True)
+    #
+    #         self.d3, self.d3_w, self.d3_b = deconv2d(tf.nn.relu(d2),
+    #                                                  [self.batch_size, s32, s32, self.fcn_filter_dim * 8],
+    #                                                  name=prefix + 'd3', with_w=True)
+    #         d3 = tf.nn.dropout(batch_norm(self.d3, name=prefix + 'bn_d3'), 0.5)
+    #
+    #         d3 = tf.concat([d3, e5], 3)
+    #         # d3 is (8 x 8 x self.fcn_filter_dim*8*2)
+    #
+    #         self.d4, self.d4_w, self.d4_b = deconv2d(tf.nn.relu(d3),
+    #                                                  [self.batch_size, s16, s16, self.fcn_filter_dim * 8],
+    #                                                  name=prefix + 'd4', with_w=True)
+    #         d4 = batch_norm(self.d4, name=prefix + 'bn_d4')
+    #
+    #         d4 = tf.concat([d4, e4], 3)
+    #         # d4 is (16 x 16 x self.fcn_filter_dim*8*2)
+    #
+    #         self.d5, self.d5_w, self.d5_b = deconv2d(tf.nn.relu(d4),
+    #                                                  [self.batch_size, s8, s8, self.fcn_filter_dim * 4],
+    #                                                  name=prefix + 'd5', with_w=True)
+    #         d5 = batch_norm(self.d5, name=prefix + 'bn_d5')
+    #         d5 = tf.concat([d5, e3], 3)
+    #         # d5 is (32 x 32 x self.fcn_filter_dim*4*2)
+    #
+    #         self.d6, self.d6_w, self.d6_b = deconv2d(tf.nn.relu(d5),
+    #                                                  [self.batch_size, s4, s4, self.fcn_filter_dim * 2],
+    #                                                  name=prefix + 'd6', with_w=True)
+    #         d6 = batch_norm(self.d6, name=prefix + 'bn_d6')
+    #         d6 = tf.concat([d6, e2], 3)
+    #         # d6 is (64 x 64 x self.fcn_filter_dim*2*2)
+    #
+    #         self.d7, self.d7_w, self.d7_b = deconv2d(tf.nn.relu(d6),
+    #                                                  [self.batch_size, s2, s2, self.fcn_filter_dim], name=prefix + 'd7',
+    #                                                  with_w=True)
     #         d7 = batch_norm(self.d7, name=prefix + 'bn_d7')
     #         d7 = tf.concat([d7, e1], 3)
     #         # d7 is (128 x 128 x self.fcn_filter_dim*1*2)
     #
-    #         self.d8, self.d8_w, self.d8_b = deconv2d(tf.nn.relu(d7), [self.batch_size, s, s, self.B_channels],
-    #                                                  name=prefix + 'd8', with_w=True)
-    #         # d8 is (256 x 256 x output_c_dim)
+    #         if prefix == 'B_g_':
+    #             self.d8, self.d8_w, self.d8_b = deconv2d(tf.nn.relu(d7), [self.batch_size, s, s, self.A_channels],
+    #                                                      name=prefix + 'd8', with_w=True)
+    #         elif prefix == 'A_g_':
+    #             self.d8, self.d8_w, self.d8_b = deconv2d(tf.nn.relu(d7), [self.batch_size, s, s, self.B_channels],
+    #                                                      name=prefix + 'd8', with_w=True)
+    #             # d8 is (256 x 256 x output_c_dim)
     #         return tf.nn.tanh(self.d8)
+
+    def fcn(self, imgs, prefix=None, reuse=False):
+        with tf.variable_scope(tf.get_variable_scope()) as scope:
+            if reuse:
+                scope.reuse_variables()
+            else:
+                assert scope.reuse == False
+
+            s = self.image_size
+            s2, s4, s8, s16, s32, s64, s128 = int(s / 2), int(s / 4), int(s / 8), int(s / 16), int(s / 32), int(
+                s / 64), int(s / 128)
+
+            # imgs is (256 x 256 x input_c_dim)
+            e1 = conv2d(imgs, self.fcn_filter_dim, name=prefix + 'e1_conv')
+            # e1 is (128 x 128 x self.fcn_filter_dim)
+            e2 = batch_norm(conv2d(lrelu(e1), self.fcn_filter_dim * 2, name=prefix + 'e2_conv'),
+                            name=prefix + 'bn_e2')
+            # e2 is (64 x 64 x self.fcn_filter_dim*2)
+            e7 = batch_norm(conv2d(lrelu(e2), self.fcn_filter_dim * 4, name=prefix + 'e7_conv'),
+                            name=prefix + 'bn_e7')
+            # e7 is (2 x 2 x self.fcn_filter_dim*8)
+            e8 = batch_norm(conv2d(lrelu(e7), self.fcn_filter_dim * 8, name=prefix + 'e8_conv'),
+                            name=prefix + 'bn_e8')
+            # e8 is (1 x 1 x self.fcn_filter_dim*8)
+
+            self.d1, self.d1_w, self.d1_b = deconv2d(tf.nn.relu(e8),
+                                                     [self.batch_size, s8, s8, self.fcn_filter_dim * 4],
+                                                     name=prefix + 'd1', with_w=True)
+            # d1 = tf.nn.dropout(batch_norm(self.d1, name=prefix + 'bn_d1'), 0.5)
+            d1 = tf.nn.dropout(batch_norm(self.d1, name=prefix + 'bn_d1'), 0.5)
+            d1 = tf.concat([d1, e7], 3)
+            # d1 is (2 x 2 x self.fcn_filter_dim*8*2)
+
+            self.d2, self.d2_w, self.d2_b = deconv2d(tf.nn.relu(d1),
+                                                     [self.batch_size, s4, s4, self.fcn_filter_dim * 2],
+                                                     name=prefix + 'd2', with_w=True)
+            # d2 = tf.nn.dropout(batch_norm(self.d2, name=prefix + 'bn_d2'), 0.5)
+            d2 = batch_norm(self.d2, name=prefix + 'bn_d2')
+
+            d2 = tf.concat([d2, e2], 3)
+            # d2 is (4 x 4 x self.fcn_filter_dim*8*2)
+            self.d7, self.d7_w, self.d7_b = deconv2d(tf.nn.relu(d2),
+                                                     [self.batch_size, s2, s2, self.fcn_filter_dim],
+                                                     name=prefix + 'd7', with_w=True)
+            d7 = batch_norm(self.d7, name=prefix + 'bn_d7')
+            d7 = tf.concat([d7, e1], 3)
+            # d7 is (128 x 128 x self.fcn_filter_dim*1*2)
+
+            self.d8, self.d8_w, self.d8_b = deconv2d(tf.nn.relu(d7), [self.batch_size, s, s, self.B_channels],
+                                                     name=prefix + 'd8', with_w=True)
+            # d8 is (256 x 256 x output_c_dim)
+            return tf.nn.tanh(self.d8)
     
     def save(self, checkpoint_dir, step):
         model_name = "DualNet.model"
