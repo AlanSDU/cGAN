@@ -48,15 +48,15 @@ python main.py --phase test --dataset_name sketch-photo --image_size 256 --epoch
 ```
 
 ## optional
-```
+
 * label-facades dataset:
-
+```
 bash ./datasets/download_dataset.sh facades
-
+```
 * using your own datasets
 
 The datasets should be seperated in to two set 'train' and 'val'. Each has two folders 'A' and 'B'. The corresponding images should be named the same, or with an extra charater 'A(B)' in folder 'A(B)'.
-```
+
 
 # datasets
 
