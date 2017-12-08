@@ -26,7 +26,7 @@
 ```
 git clone https://github.com/AlanSDU/cGAN.git
 
-cd DualGAN
+cd cGAN
 ```
 
 * download datasets (e.g., sketch-photo), run:
@@ -38,19 +38,24 @@ bash ./datasets/download_dataset.sh sketch-photo
 * train the model:
 
 ```
-python main.py --phase train --dataset_name sketch-photo --image_size 256 --epoch 45 --A_channels 1 --B_channels 1
+python main.py --phase train --dataset_name sketch-photo --image_size 256 --epoch 45 --A_channels 1 --B_channels 1 --suffix jpg
 ```
 
 * test the model:
 
 ```
-python main.py --phase test --dataset_name sketch-photo --image_size 256 --epoch 45 --A_channels 1 --B_channels 1
+python main.py --phase test --dataset_name sketch-photo --image_size 256 --epoch 45 --A_channels 1 --B_channels 1 --suffix jpg
 ```
 
 ## optional
 ```
+* label-facades dataset:
+
 bash ./datasets/download_dataset.sh facades
 
+* using your own datasets
+
+The datasets should be seperated in to two set 'train' and 'val'. Each has two folders 'A' and 'B'. The corresponding images should be named the same, or with an extra charater 'A(B)' in folder 'A(B)'.
 ```
 
 # datasets
@@ -72,6 +77,7 @@ day-night: http://www.cs.mun.ca/~yz7241/dataset/
 Codes are built on the top of DualGAN. Thanks for their precedent contributions!
 
 Conditional Generative Adversarial Nets
+
 @article{DBLP:journals/corr/MirzaO14,
   author    = {Mehdi Mirza and
                Simon Osindero},
