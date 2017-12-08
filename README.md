@@ -55,7 +55,7 @@ bash ./datasets/download_dataset.sh facades
 ```
 * using your own datasets
 
-The datasets should be seperated in to two set 'train' and 'val'. Each has two folders 'A' and 'B'. The corresponding images should be named the same, or with an extra charater 'A(B)' in folder 'A(B)'.
+The datasets should be seperated into two sets 'train' and 'val'. Each has two folders 'A' and 'B'. The corresponding images should be named the same, or with an extra charater 'A(B)' in folder 'A(B)'.
 
 
 # datasets
